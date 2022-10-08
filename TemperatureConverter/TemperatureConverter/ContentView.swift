@@ -7,39 +7,51 @@
 
 import SwiftUI
 
+enum Unit {
+    case Celsius
+    case Fahrenheit
+    case Kelvin
+}
 // Celsius, Fahrenheit, or Kelvin
 struct ContentView: View {
     @State private var inputTemp = 0.0
-    @State private var inputUnit = "Celsius"
-    @State private var outputUnit = "Celsius"
+    @State private var inputUnit = Unit.Celsius
+    @State private var outputUnit = Unit.Celsius
     
     private let celsiusToKelvin = 273.15 // C = K + 273.15
     private let celsiusToFahrenheit = 1.8 // C = F / 1.8
     
     var outputTemp : Double {
-        if inputUnit==outputUnit {
-            return inputTemp
-        } else if(inputUnit=="Celsius"){
-            if outputUnit == "Fahrenheit" {
+        switch inputUnit {
+        case .Celsius:
+            switch outputUnit {
+            case .Celsius:
+                return inputTemp
+            case .Fahrenheit:
                 return inputTemp * celsiusToFahrenheit
-            } else {
-                return inputTemp - celsiusToKelvin
-            }
-        } else if(inputUnit=="Fahrenheit"){
-            if outputUnit == "Celsius" {
-                return inputTemp / celsiusToFahrenheit
-            } else {
-                return inputTemp / celsiusToFahrenheit - celsiusToKelvin
-            }
-        } else {
-            if outputUnit == "Celsius" {
+            case .Kelvin:
                 return inputTemp + celsiusToKelvin
-            } else {
-                return inputTemp * celsiusToFahrenheit + celsiusToKelvin
+            }
+        case .Fahrenheit:
+            switch outputUnit {
+            case .Celsius:
+                return inputTemp / celsiusToFahrenheit
+            case .Fahrenheit:
+                return inputTemp
+            case .Kelvin:
+                return inputTemp / celsiusToFahrenheit + celsiusToKelvin
+            }
+        case .Kelvin:
+            switch outputUnit {
+            case .Celsius:
+                return inputTemp - celsiusToKelvin
+            case .Fahrenheit:
+                return (inputTemp - celsiusToKelvin) * celsiusToFahrenheit
+            case .Kelvin:
+                return inputTemp
             }
         }
     }
-    var units = ["Celsius", "Fahrenheit", "Kelvin"]
     var body: some View {
         NavigationView {
             Form {
@@ -67,13 +79,13 @@ struct ContentView: View {
 
 struct UnitPicker: View {
     let header: String
-    @Binding public var selectedUnit : String
-    var units = ["Celsius", "Fahrenheit", "Kelvin"]
+    @Binding public var selectedUnit : Unit
+    var units = [Unit.Celsius, Unit.Fahrenheit, Unit.Kelvin]
     var body: some View {
         Section{
             Picker(header, selection: $selectedUnit){
                 ForEach(units, id: \.self){
-                    Text($0)
+                    Text($0.toString())
                 }
             }.pickerStyle(.segmented)
         } header: {
@@ -81,6 +93,21 @@ struct UnitPicker: View {
         }
     }
 }
+
+extension Unit {
+    func toString() -> String {
+        switch self {
+        case .Celsius:
+            return "Celsius"
+        case .Fahrenheit:
+            return "Fahrenheit"
+        case .Kelvin:
+            return "Kelvin"
+        }
+    }
+}
+
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
